@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import TodoItem from "./ToDoItem";
 
 const ToDo = () => {
   const [text, setText] = useState("");
@@ -25,20 +26,16 @@ const ToDo = () => {
         (item) => item.id === newItem.id
       );
       const todoListCopy = [...todoList];
-
       todoListCopy[itemToEditIndex] = newItem;
-
       localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoListCopy));
       setTodoList(todoListCopy);
     } else {
       newItem = {
         id: uuidv4(),
-        text, // ILI text: text
+        text,
         isCompleted: false,
       };
 
-      // IMMEDIATE RETURN
-      // setToDoList((prevState) =>[...prevState, newItem]);
       setTodoList((prevState) => {
         localStorage.setItem(
           TODO_STORAGE_KEY,
@@ -54,9 +51,7 @@ const ToDo = () => {
   const handleCheckToDoItem = (itemId) => {
     const itemToCheckIndex = todoList.findIndex((item) => item.id === itemId);
     const todoListCopy = [...todoList];
-
     todoListCopy[itemToCheckIndex].isCompleted = true;
-
     localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoListCopy));
     setTodoList(todoListCopy);
     setIsEditMode(false);
@@ -65,7 +60,6 @@ const ToDo = () => {
 
   useEffect(() => {
     const toDos = localStorage.getItem(TODO_STORAGE_KEY);
-    // null => falsy, [] => truthy
     if (toDos) {
       setTodoList(JSON.parse(toDos));
     }
@@ -79,13 +73,10 @@ const ToDo = () => {
 
   const onDelete = (item) => {
     const todoListCopy = [...todoList];
-
     const itemToDeleteIndex = todoListCopy.findIndex(
       (todo) => todo.id === item.id
     );
-
     todoListCopy.splice(itemToDeleteIndex, 1);
-
     localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoListCopy));
     setTodoList(todoListCopy);
   };
@@ -97,7 +88,7 @@ const ToDo = () => {
         <input
           type="text"
           className="input"
-          onChange={(event) => handleChange(event)}
+          onChange={handleChange}
           value={text}
         />
         <button className="add-button" onClick={addOrEditItem} disabled={!text}>
@@ -106,25 +97,13 @@ const ToDo = () => {
       </div>
       <div>
         {todoList.map((todoItem) => (
-          <div key={todoItem.id} className={`todo-item-wrapper`}>
-            <h3 className={`${todoItem.isCompleted ? "line-through" : ""}`}>
-              {todoItem.text}
-            </h3>
-            <div>
-              <button onClick={() => handleCheckToDoItem(todoItem.id)}>
-                Check
-              </button>
-              <button className="edit-button" onClick={() => onEdit(todoItem)}>
-                Edit
-              </button>
-              <button
-                disabled={!todoItem.isCompleted}
-                onClick={() => onDelete(todoItem)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+          <TodoItem
+            key={todoItem.id}
+            todoItem={todoItem}
+            handleCheckToDoItem={handleCheckToDoItem}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         ))}
       </div>
     </div>
